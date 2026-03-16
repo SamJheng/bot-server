@@ -31,6 +31,20 @@ services:
     volumes:
       - ollama-data:/root/.ollama
 
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      - ollama
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 5
+        ollama pull llama3.2
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
