@@ -1,0 +1,50 @@
+services:
+  openclaw:
+    image: alpine/openclaw:latest
+    container_name: openclaw
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - OLLAMA_API_KEY=ollama-local
+    volumes:
+      - openclaw-config:/home/node/.openclaw
+    ports:
+      - "18789:18789"
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:18789/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - open-webui-data:/app/backend/data
+
+volumes:
+  openclaw-config:
+  ollama-data:
+  open-webui-data:
