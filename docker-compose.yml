@@ -11,9 +11,21 @@ services:
       - |
         chown -R node:node /home/node/.openclaw
         mkdir -p /home/node/.openclaw
-        if [ ! -f /home/node/.openclaw/openclaw.json ]; then
-          echo "{\"gateway\":{\"bind\":\"lan\",\"controlUi\":{\"allowedOrigins\":[\"http://${SERVER_IP}:18789\"]}}}" > /home/node/.openclaw/openclaw.json
-        fi
+        node -e "
+        const fs = require('fs');
+        const p = '/home/node/.openclaw/openclaw.json';
+        let cfg = {};
+        try { cfg = JSON.parse(fs.readFileSync(p, 'utf8')); } catch(e) {}
+        if (!cfg.gateway) cfg.gateway = {};
+        cfg.gateway.bind = 'lan';
+        if (!cfg.gateway.controlUi) cfg.gateway.controlUi = {};
+        if (!cfg.gateway.controlUi.allowedOrigins) cfg.gateway.controlUi.allowedOrigins = [];
+        const origin = 'http://' + process.env.SERVER_IP + ':18789';
+        if (!cfg.gateway.controlUi.allowedOrigins.includes(origin)) {
+          cfg.gateway.controlUi.allowedOrigins.push(origin);
+        }
+        fs.writeFileSync(p, JSON.stringify(cfg, null, 2));
+        "
         chown -R node:node /home/node/.openclaw
     volumes:
       - openclaw-config:/home/node/.openclaw
