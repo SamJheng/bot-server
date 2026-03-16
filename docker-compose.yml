@@ -8,6 +8,11 @@ services:
     command:
       - |
         chown -R node:node /home/node/.openclaw
+        mkdir -p /home/node/.openclaw
+        if [ ! -f /home/node/.openclaw/openclaw.json ]; then
+          echo '{"gateway":{"bind":"lan"}}' > /home/node/.openclaw/openclaw.json
+        fi
+        chown -R node:node /home/node/.openclaw
     volumes:
       - openclaw-config:/home/node/.openclaw
 
