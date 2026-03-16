@@ -19,6 +19,7 @@ services:
       openclaw-init:
         condition: service_completed_successfully
       ollama:
+        condition: service_started
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
