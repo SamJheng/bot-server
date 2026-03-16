@@ -4,13 +4,14 @@ services:
     container_name: openclaw-init
     user: root
     restart: "no"
+    environment:
+      - SERVER_IP=${SERVER_IP}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         chown -R node:node /home/node/.openclaw
         mkdir -p /home/node/.openclaw
         if [ ! -f /home/node/.openclaw/openclaw.json ]; then
-          SERVER_IP=$(curl -s --max-time 5 ifconfig.me)
           echo "{\"gateway\":{\"bind\":\"lan\",\"controlUi\":{\"allowedOrigins\":[\"http://${SERVER_IP}:18789\"]}}}" > /home/node/.openclaw/openclaw.json
         fi
         chown -R node:node /home/node/.openclaw
