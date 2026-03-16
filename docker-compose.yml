@@ -1,10 +1,24 @@
 services:
+  openclaw-init:
+    image: alpine/openclaw:latest
+    container_name: openclaw-init
+    user: root
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        chown -R node:node /home/node/.openclaw
+    volumes:
+      - openclaw-config:/home/node/.openclaw
+
   openclaw:
     image: alpine/openclaw:latest
     container_name: openclaw
     restart: unless-stopped
     depends_on:
-      - ollama
+      openclaw-init:
+        condition: service_completed_successfully
+      ollama:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -27,7 +41,7 @@ services:
     container_name: ollama
     restart: unless-stopped
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama-data:/root/.ollama
 
